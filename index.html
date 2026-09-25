@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Où est la team CUT. ? 🚀</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #FFE5D0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .title-section h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 0.85rem;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .week-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .week-nav button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .week-nav button:hover {
+            background: #f0f0f0;
+        }
+        
+        .week-info {
+            text-align: center;
+        }
+        
+        .week-info .week-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        
+        .week-info .week-dates {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .user-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .user-selector span {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .user-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .user-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .user-btn.active {
+            background: #1a1a2e;
+            color: white;
+            border-color: #1a1a2e;
+        }
+        
+        .refresh-btn {
+            margin-left: 10px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .status-bar {
+            text-align: right;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .status-bar strong {
+            color: #1a1a2e;
+        }
+        
+        .sync-status {
+            margin-left: 15px;
+            font-size: 0.85rem;
+        }
+        
+        .sync-status.success {
+            color: #28a745;
+        }
+        
+        .sync-status.error {
+            color: #dc3545;
+        }
+        
+        .sync-status.loading {
+            color: #ffc107;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        
+        th {
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 600;
+            color: #1a1a2e;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th:first-child {
+            text-align: left;
+            padding-left: 20px;
+        }
+        
+        th .day-name {
+            display: block;
+        }
+        
+        th .day-number {
+            font-size: 0.85rem;
+            color: #888;
+            font-weight: 400;
+        }
+        
+        td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+            height: 70px;
+            vertical-align: middle;
+        }
+        
+        td:first-child {
+            text-align: left;
+            padding-left: 20px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        
+        .cell-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            padding: 8px;
+            min-height: 54px;
+        }
+        
+        .cell-content:hover {
+            background: #f8f8f8;
+        }
+        
+        .cell-content.filled {
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .cell-content .emoji {
+            font-size: 1.5rem;
+        }
+        
+        .cell-content .label {
+            font-size: 0.75rem;
+            color: #555;
+        }
+        
+        .cell-content .precision {
+            font-size: 0.65rem;
+            color: #888;
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .cell-content.puteaux { background: #FFDAB3; }
+        .cell-content.pantin { background: #FFF3CD; }
+        .cell-content.teletravail { background: #D4EDDA; }
+        .cell-content.shoot { background: #D6EAF8; }
+        .cell-content.off { background: #FADBD8; }
+        .cell-content.autre { background: #E8DAEF; }
+        
+        .plus-icon {
+            font-size: 1.5rem;
+            color: #ccc;
+        }
+        
+        .total-row td {
+            background: #fafafa;
+            border-bottom: none;
+        }
+        
+        .total-row td:first-child {
+            color: #888;
+            font-weight: 400;
+            font-size: 0.85rem;
+        }
+        
+        .total-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 0.75rem;
+        }
+        
+        .total-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            color: #555;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 5px;
+        }
+        
+        .modal .modal-date {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .option-btn {
+            padding: 15px 10px;
+            border-radius: 12px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        
+        .option-btn .emoji {
+            font-size: 1.8rem;
+        }
+        
+        .option-btn .label {
+            font-size: 0.8rem;
+            color: #555;
+        }
+        
+        .option-btn.puteaux { background: #FFDAB3; }
+        .option-btn.pantin { background: #FFF3CD; }
+        .option-btn.teletravail { background: #D4EDDA; }
+        .option-btn.shoot { background: #D6EAF8; }
+        .option-btn.off { background: #FADBD8; }
+        .option-btn.autre { background: #E8DAEF; }
+        
+        .option-btn.selected {
+            border-color: #3b82f6;
+        }
+        
+        .precision-section {
+            margin-bottom: 15px;
+        }
+        
+        .precision-section label {
+            display: block;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        
+        .precision-section input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            background: #f5f5f5;
+        }
+        
+        .precision-section input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .apply-week {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        .apply-week input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .btn-cancel {
+            padding: 12px 25px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .btn-save {
+            padding: 12px 25px;
+            border-radius: 10px;
+            border: none;
+            background: #1a1a2e;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .btn-cancel:hover {
+            background: #f5f5f5;
+        }
+        
+        .btn-save:hover {
+            background: #2d2d4a;
+        }
+        
+        .btn-save:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title-section">
+                <h1>Où est la team CUT. ? 🚀</h1>
+                <p class="subtitle">Indiquer votre présence site ou TT sur Teams/Outlook également</p>
+            </div>
+            <div class="week-nav">
+                <button onclick="changeWeek(-1)">‹</button>
+                <div class="week-info">
+                    <div class="week-number" id="weekNumber">Semaine 40</div>
+                    <div class="week-dates" id="weekDates">du 28 sept. au 2 oct.</div>
+                </div>
+                <button onclick="changeWeek(1)">›</button>
+            </div>
+        </div>
+        
+        <div class="user-selector">
+            <span>Tu es :</span>
+            <button class="user-btn active" onclick="selectUser('Marine')">Marine</button>
+            <button class="user-btn" onclick="selectUser('Nicolas')">Nicolas</button>
+            <button class="user-btn" onclick="selectUser('Pauline')">Pauline</button>
+            <button class="user-btn" onclick="selectUser('Martin')">Martin</button>
+            <button class="user-btn" onclick="selectUser('Emma')">Emma</button>
+            <button class="user-btn" onclick="selectUser('Aline')">Aline</button>
+            <button class="refresh-btn" onclick="loadData()">🔄 Actualiser</button>
+        </div>
+        
+        <div class="status-bar">
+            <span id="statusBar"><strong>0/6</strong> ont tout rempli. Manque : Marine, Nicolas, Pauline, Martin, Emma, Aline</span>
+            <span class="sync-status loading" id="syncStatus">⏳ Chargement...</span>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th id="th-0"><span class="day-name">Lun</span><span class="day-number"></span></th>
+                        <th id="th-1"><span class="day-name">Mar</span><span class="day-number"></span></th>
+                        <th id="th-2"><span class="day-name">Mer</span><span class="day-number"></span></th>
+                        <th id="th-3"><span class="day-name">Jeu</span><span class="day-number"></span></th>
+                        <th id="th-4"><span class="day-name">Ven</span><span class="day-number"></span></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item"><span>🏢</span> Puteaux</div>
+            <div class="legend-item"><span>⛪</span> Pantin</div>
+            <div class="legend-item"><span>🏠</span> Télétravail</div>
+            <div class="legend-item"><span>🎥</span> Shoot</div>
+            <div class="legend-item"><span>🌴</span> Off</div>
+            <div class="legend-item"><span>📍</span> Autre</div>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 id="modalTitle">Marine</h2>
+            <div class="modal-date" id="modalDate">lundi 28 septembre</div>
+            
+            <div class="options-grid">
+                <button class="option-btn puteaux" data-value="puteaux" onclick="selectOption('puteaux')">
+                    <span class="emoji">🏢</span>
+                    <span class="label">Puteaux</span>
+                </button>
+                <button class="option-btn pantin" data-value="pantin" onclick="selectOption('pantin')">
+                    <span class="emoji">⛪</span>
+                    <span class="label">Pantin</span>
+                </button>
+                <button class="option-btn teletravail" data-value="teletravail" onclick="selectOption('teletravail')">
+                    <span class="emoji">🏠</span>
+                    <span class="label">Télétravail</span>
+                </button>
+                <button class="option-btn shoot" data-value="shoot" onclick="selectOption('shoot')">
+                    <span class="emoji">🎥</span>
+                    <span class="label">Shoot</span>
+                </button>
+                <button class="option-btn autre" data-value="autre" onclick="selectOption('autre')">
+                    <span class="emoji">📍</span>
+                    <span class="label">Autre</span>
+                </button>
+                <button class="option-btn off" data-value="off" onclick="selectOption('off')">
+                    <span class="emoji">🌴</span>
+                    <span class="label">Off</span>
+                </button>
+            </div>
+            
+            <div class="precision-section">
+                <label>Précision (facultatif, obligatoire pour Autre)</label>
+                <input type="text" id="precisionInput" placeholder="Ex. rdv client, Cannes, formation...">
+            </div>
+            
+            <div class="apply-week">
+                <input type="checkbox" id="applyWeek">
+                <label for="applyWeek">Appliquer à toute la semaine</label>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn-save" id="saveBtn" onclick="saveSelection()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzrA8Smt4hjateh8rZ7oPqQCEIqaA4EJe5heUBRFg_iY84sGFke3yVwqIEE1KGLItc/exec';
+        
+        const teamMembers = ['Marine', 'Nicolas', 'Pauline', 'Martin', 'Emma', 'Aline'];
+        const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
+        const options = {
+            puteaux: { emoji: '🏢', label: 'Puteaux' },
+            pantin: { emoji: '⛪', label: 'Pantin' },
+            teletravail: { emoji: '🏠', label: 'Télétravail' },
+            shoot: { emoji: '🎥', label: 'Shoot' },
+            off: { emoji: '🌴', label: 'Off' },
+            autre: { emoji: '📍', label: 'Autre' }
+        };
+        
+        let currentUser = 'Marine';
+        let currentWeekOffset = 0;
+        let currentSelection = null;
+        let currentCell = null;
+        let data = {};
+        let isSaving = false;
+        
+        function getWeekKey(offset) {
+            const date = new Date();
+            date.setDate(date.getDate() + (offset * 7));
+            const startOfWeek = getStartOfWeek(date);
+            const weekNum = getWeekNumber(startOfWeek);
+            return `${startOfWeek.getFullYear()}-W${weekNum}`;
+        }
+        
+        function getStartOfWeek(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            d.setDate(diff);
+            return d;
+        }
+        
+        function getNextWeekStart() {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const daysUntilNextMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+            const nextMonday = new Date(today);
+            nextMonday.setDate(today.getDate() + daysUntilNextMonday);
+            return nextMonday;
+        }
+        
+        function initWeekOffset() {
+            const today = new Date();
+            const nextWeekStart = getNextWeekStart();
+            const diffTime = nextWeekStart - getStartOfWeek(today);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            currentWeekOffset = Math.floor(diffDays / 7);
+        }
+        
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+        
+        function formatDate(date) {
+            const months = ['janv.', 'fév.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+            return `${date.getDate()} ${months[date.getMonth()]}`;
+        }
+        
+        function formatFullDate(date) {
+            const daysNames = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+            const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+            return `${daysNames[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`;
+        }
+        
+        function updateWeekDisplay() {
+            const today = new Date();
+            today.setDate(today.getDate() + (currentWeekOffset * 7));
+            const startOfWeek = getStartOfWeek(today);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(endOfWeek.getDate() + 4);
+            
+            const weekNum = getWeekNumber(startOfWeek);
+            document.getElementById('weekNumber').textContent = `Semaine ${weekNum}`;
+            document.getElementById('weekDates').textContent = `du ${formatDate(startOfWeek)} au ${formatDate(endOfWeek)}`;
+            
+            for (let i = 0; i < 5; i++) {
+                const dayDate = new Date(startOfWeek);
+                dayDate.setDate(dayDate.getDate() + i);
+                const th = document.getElementById(`th-${i}`);
+                th.querySelector('.day-number').textContent = dayDate.getDate();
+            }
+            
+            renderTable();
+        }
+        
+        function changeWeek(delta) {
+            currentWeekOffset += delta;
+            updateWeekDisplay();
+        }
+        
+        function selectUser(user) {
+            currentUser = user;
+            document.querySelectorAll('.user-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === user);
+            });
+        }
+        
+        function setSyncStatus(status, message) {
+            const el = document.getElementById('syncStatus');
+            el.className = 'sync-status ' + status;
+            el.textContent = message;
+        }
+        
+        async function loadData() {
+            setSyncStatus('loading', '⏳ Chargement...');
+            
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=get`);
+                const result = await response.json();
+                
+                data = {};
+                result.forEach(item => {
+                    if (!data[item.semaine]) data[item.semaine] = {};
+                    if (!data[item.semaine][item.membre]) data[item.semaine][item.membre] = {};
+                    data[item.semaine][item.membre][item.jour] = {
+                        type: item.lieu,
+                        precision: item.precision || ''
+                    };
+                });
+                
+                renderTable();
+                setSyncStatus('success', '✅ Synchronisé');
+            } catch (error) {
+                console.error('Erreur de chargement:', error);
+                setSyncStatus('error', '❌ Erreur de connexion');
+            }
+        }
+        
+        async function saveToServer(semaine, membre, jour, lieu, precision) {
+            const params = new URLSearchParams({
+                action: 'save',
+                semaine: semaine,
+                membre: membre,
+                jour: jour,
+                lieu: lieu,
+                precision: precision || ''
+            });
+            
+            try {
+                await fetch(`${SCRIPT_URL}?${params.toString()}`);
+                return true;
+            } catch (error) {
+                console.error('Erreur de sauvegarde:', error);
+                return false;
+            }
+        }
+        
+        function renderTable() {
+            const weekKey = getWeekKey(currentWeekOffset);
+            if (!data[weekKey]) {
+                data[weekKey] = {};
+            }
+            
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            teamMembers.forEach(member => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${member}</td>`;
+                
+                for (let i = 0; i < 5; i++) {
+                    const td = document.createElement('td');
+                    const cellData = data[weekKey][member]?.[i];
+                    
+                    let content = '';
+                    if (cellData && options[cellData.type]) {
+                        const opt = options[cellData.type];
+                        content = `
+                            <div class="cell-content filled ${cellData.type}" onclick="openModal('${member}', ${i})">
+                                <span class="emoji">${opt.emoji}</span>
+                                <span class="label">${opt.label}</span>
+                                ${cellData.precision ? `<span class="precision" title="${cellData.precision}">${cellData.precision}</span>` : ''}
+                            </div>
+                        `;
+                    } else {
+                        content = `
+                            <div class="cell-content" onclick="openModal('${member}', ${i})">
+                                <span class="plus-icon">+</span>
+                            </div>
+                        `;
+                    }
+                    td.innerHTML = content;
+                    row.appendChild(td);
+                }
+                
+                tbody.appendChild(row);
+            });
+            
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row';
+            totalRow.innerHTML = '<td>Total</td>';
+            
+            for (let i = 0; i < 5; i++) {
+                const td = document.createElement('td');
+                const counts = {};
+                
+                teamMembers.forEach(member => {
+                    const cellData = data[weekKey][member]?.[i];
+                    if (cellData && cellData.type) {
+                        counts[cellData.type] = (counts[cellData.type] || 0) + 1;
+                    }
+                });
+                
+                let totalContent = '<div class="total-cell">';
+                if (Object.keys(counts).length === 0) {
+                    totalContent += '—';
+                } else {
+                    for (const [type, count] of Object.entries(counts)) {
+                        if (options[type]) {
+                            totalContent += `<div class="total-item">${options[type].emoji} ${count}</div>`;
+                        }
+                    }
+                }
+                totalContent += '</div>';
+                td.innerHTML = totalContent;
+                totalRow.appendChild(td);
+            }
+            
+            tbody.appendChild(totalRow);
+            updateStatusBar();
+        }
+        
+        function updateStatusBar() {
+            const weekKey = getWeekKey(currentWeekOffset);
+            let completed = 0;
+            const missing = [];
+            
+            teamMembers.forEach(member => {
+                let filledDays = 0;
+                for (let i = 0; i < 5; i++) {
+                    if (data[weekKey]?.[member]?.[i]) {
+                        filledDays++;
+                    }
+                }
+                if (filledDays === 5) {
+                    completed++;
+                } else {
+                    missing.push(member);
+                }
+            });
+            
+            const statusBar = document.getElementById('statusBar');
+            if (missing.length === 0) {
+                statusBar.innerHTML = `<strong>${completed}/6</strong> ont tout rempli. ✅ Tout le monde est à jour !`;
+            } else {
+                statusBar.innerHTML = `<strong>${completed}/6</strong> ont tout rempli. Manque : ${missing.join(', ')}`;
+            }
+        }
+        
+        function openModal(member, dayIndex) {
+            if (member !== currentUser) {
+                alert(`Tu dois te sélectionner en tant que "${member}" pour modifier cette case.`);
+                return;
+            }
+            
+            currentCell = { member, dayIndex };
+            currentSelection = null;
+            
+            const today = new Date();
+            today.setDate(today.getDate() + (currentWeekOffset * 7));
+            const startOfWeek = getStartOfWeek(today);
+            const dayDate = new Date(startOfWeek);
+            dayDate.setDate(dayDate.getDate() + dayIndex);
+            
+            document.getElementById('modalTitle').textContent = member;
+            document.getElementById('modalDate').textContent = formatFullDate(dayDate);
+            
+            document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('precisionInput').value = '';
+            document.getElementById('applyWeek').checked = false;
+            
+            const weekKey = getWeekKey(currentWeekOffset);
+            const existing = data[weekKey]?.[member]?.[dayIndex];
+            if (existing) {
+                currentSelection = existing.type;
+                const btn = document.querySelector(`.option-btn[data-value="${existing.type}"]`);
+                if (btn) btn.classList.add('selected');
+                document.getElementById('precisionInput').value = existing.precision || '';
+            }
+            
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            currentCell = null;
+            currentSelection = null;
+        }
+        
+        function selectOption(value) {
+            currentSelection = value;
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.value === value);
+            });
+        }
+        
+        async function saveSelection() {
+            if (!currentSelection) {
+                alert('Veuillez sélectionner une option.');
+                return;
+            }
+            
+            const precision = document.getElementById('precisionInput').value.trim();
+            
+            if (currentSelection === 'autre' && !precision) {
+                alert('Veuillez préciser le lieu pour "Autre".');
+                return;
+            }
+            
+            if (isSaving) return;
+            isSaving = true;
+            
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Enregistrement...';
+            
+            const weekKey = getWeekKey(currentWeekOffset);
+            if (!data[weekKey]) data[weekKey] = {};
+            if (!data[weekKey][currentCell.member]) data[weekKey][currentCell.member] = {};
+            
+            const applyToWeek = document.getElementById('applyWeek').checked;
+            
+            try {
+                if (applyToWeek) {
+                    for (let i = 0; i < 5; i++) {
+                        data[weekKey][currentCell.member][i] = {
+                            type: currentSelection,
+                            precision: precision
+                        };
+                        await saveToServer(weekKey, currentCell.member, i, currentSelection, precision);
+                    }
+                } else {
+                    data[weekKey][currentCell.member][currentCell.dayIndex] = {
+                        type: currentSelection,
+                        precision: precision
+                    };
+                    await saveToServer(weekKey, currentCell.member, currentCell.dayIndex, currentSelection, precision);
+                }
+                
+                setSyncStatus('success', '✅ Synchronisé');
+            } catch (error) {
+                setSyncStatus('error', '❌ Erreur de sauvegarde');
+            }
+            
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Enregistrer';
+            isSaving = false;
+            
+            closeModal();
+            renderTable();
+        }
+        
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // Initialize
+        initWeekOffset();
+        updateWeekDisplay();
+        loadData();
+    </script>
+</body>
+</html>
