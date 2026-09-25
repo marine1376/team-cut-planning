@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -119,7 +120,7 @@
         
         .refresh-btn {
             margin-left: 10px;
-            padding: 8px 15px;
+            padding: 8px 16px;
             border-radius: 20px;
             border: 1px solid #ddd;
             background: white;
@@ -171,7 +172,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px;
+            min-width: 700px;
         }
         
         th {
@@ -195,6 +196,10 @@
             font-size: 0.85rem;
             color: #888;
             font-weight: 400;
+        }
+        
+        th.today {
+            color: #3b82f6;
         }
         
         td {
@@ -458,10 +463,20 @@
         .btn-save:hover {
             background: #2d2d4a;
         }
-        
-        .btn-save:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .title-section h1 {
+                font-size: 1.5rem;
+            }
+            
+            .options-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
@@ -570,13 +585,13 @@
             
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeModal()">Annuler</button>
-                <button class="btn-save" id="saveBtn" onclick="saveSelection()">Enregistrer</button>
+                <button class="btn-save" onclick="saveSelection()">Enregistrer</button>
             </div>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzrA8Smt4hjateh8rZ7oPqQCEIqaA4EJe5heUBRFg_iY84sGFke3yVwqIEE1KGLItc/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyw0jpzJfXOx6zPyJMqXYhcZWUKuYcJQkrfFZ-22vXEf_kOTZ5kEtCSpqZOKNrpuic/exec';
         
         const teamMembers = ['Marine', 'Nicolas', 'Pauline', 'Martin', 'Emma', 'Aline'];
         const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
@@ -594,7 +609,84 @@
         let currentSelection = null;
         let currentCell = null;
         let data = {};
-        let isSaving = false;
+        let isOnline = false;
+
+        function setSyncStatus(status, message) {
+            const el = document.getElementById('syncStatus');
+            el.className = 'sync-status ' + status;
+            if (status === 'success') {
+                el.textContent = '✅ ' + message;
+            } else if (status === 'error') {
+                el.textContent = '❌ ' + message;
+            } else {
+                el.textContent = '⏳ ' + message;
+            }
+        }
+
+        async function loadData() {
+            setSyncStatus('loading', 'Chargement...');
+            try {
+                const response = await fetch(SCRIPT_URL + '?action=get', {
+                    method: 'GET',
+                    mode: 'cors',
+                    redirect: 'follow'
+                });
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const rows = await response.json();
+                
+                // Clear and rebuild data
+                data = {};
+                rows.forEach(row => {
+                    if (!data[row.semaine]) data[row.semaine] = {};
+                    if (!data[row.semaine][row.membre]) data[row.semaine][row.membre] = {};
+                    data[row.semaine][row.membre][row.jour] = {
+                        type: row.lieu,
+                        precision: row.precision
+                    };
+                });
+                
+                isOnline = true;
+                setSyncStatus('success', 'Synchronisé');
+                renderTable();
+            } catch (error) {
+                console.error('Load error:', error);
+                isOnline = false;
+                setSyncStatus('error', 'Erreur de connexion');
+                renderTable();
+            }
+        }
+
+        async function saveToServer(semaine, membre, jour, lieu, precision) {
+            try {
+                const params = new URLSearchParams({
+                    action: 'save',
+                    semaine: semaine,
+                    membre: membre,
+                    jour: jour,
+                    lieu: lieu,
+                    precision: precision || ''
+                });
+                
+                await fetch(SCRIPT_URL + '?' + params.toString(), {
+                    method: 'GET',
+                    mode: 'cors',
+                    redirect: 'follow'
+                });
+                
+                setSyncStatus('success', 'Enregistré !');
+                setTimeout(() => {
+                    if (isOnline) setSyncStatus('success', 'Synchronisé');
+                }, 2000);
+                
+                return true;
+            } catch (error) {
+                console.error('Save error:', error);
+                setSyncStatus('error', 'Erreur de sauvegarde');
+                return false;
+            }
+        }
         
         function getWeekKey(offset) {
             const date = new Date();
@@ -681,56 +773,6 @@
             });
         }
         
-        function setSyncStatus(status, message) {
-            const el = document.getElementById('syncStatus');
-            el.className = 'sync-status ' + status;
-            el.textContent = message;
-        }
-        
-        async function loadData() {
-            setSyncStatus('loading', '⏳ Chargement...');
-            
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=get`);
-                const result = await response.json();
-                
-                data = {};
-                result.forEach(item => {
-                    if (!data[item.semaine]) data[item.semaine] = {};
-                    if (!data[item.semaine][item.membre]) data[item.semaine][item.membre] = {};
-                    data[item.semaine][item.membre][item.jour] = {
-                        type: item.lieu,
-                        precision: item.precision || ''
-                    };
-                });
-                
-                renderTable();
-                setSyncStatus('success', '✅ Synchronisé');
-            } catch (error) {
-                console.error('Erreur de chargement:', error);
-                setSyncStatus('error', '❌ Erreur de connexion');
-            }
-        }
-        
-        async function saveToServer(semaine, membre, jour, lieu, precision) {
-            const params = new URLSearchParams({
-                action: 'save',
-                semaine: semaine,
-                membre: membre,
-                jour: jour,
-                lieu: lieu,
-                precision: precision || ''
-            });
-            
-            try {
-                await fetch(`${SCRIPT_URL}?${params.toString()}`);
-                return true;
-            } catch (error) {
-                console.error('Erreur de sauvegarde:', error);
-                return false;
-            }
-        }
-        
         function renderTable() {
             const weekKey = getWeekKey(currentWeekOffset);
             if (!data[weekKey]) {
@@ -772,6 +814,7 @@
                 tbody.appendChild(row);
             });
             
+            // Total row
             const totalRow = document.createElement('tr');
             totalRow.className = 'total-row';
             totalRow.innerHTML = '<td>Total</td>';
@@ -782,7 +825,7 @@
                 
                 teamMembers.forEach(member => {
                     const cellData = data[weekKey][member]?.[i];
-                    if (cellData && cellData.type) {
+                    if (cellData && options[cellData.type]) {
                         counts[cellData.type] = (counts[cellData.type] || 0) + 1;
                     }
                 });
@@ -792,9 +835,7 @@
                     totalContent += '—';
                 } else {
                     for (const [type, count] of Object.entries(counts)) {
-                        if (options[type]) {
-                            totalContent += `<div class="total-item">${options[type].emoji} ${count}</div>`;
-                        }
+                        totalContent += `<div class="total-item">${options[type].emoji} ${count}</div>`;
                     }
                 }
                 totalContent += '</div>';
@@ -803,6 +844,7 @@
             }
             
             tbody.appendChild(totalRow);
+            
             updateStatusBar();
         }
         
@@ -814,7 +856,7 @@
             teamMembers.forEach(member => {
                 let filledDays = 0;
                 for (let i = 0; i < 5; i++) {
-                    if (data[weekKey]?.[member]?.[i]) {
+                    if (data[weekKey][member]?.[i]) {
                         filledDays++;
                     }
                 }
@@ -893,44 +935,27 @@
                 return;
             }
             
-            if (isSaving) return;
-            isSaving = true;
-            
-            const saveBtn = document.getElementById('saveBtn');
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'Enregistrement...';
-            
             const weekKey = getWeekKey(currentWeekOffset);
             if (!data[weekKey]) data[weekKey] = {};
             if (!data[weekKey][currentCell.member]) data[weekKey][currentCell.member] = {};
             
             const applyToWeek = document.getElementById('applyWeek').checked;
             
-            try {
-                if (applyToWeek) {
-                    for (let i = 0; i < 5; i++) {
-                        data[weekKey][currentCell.member][i] = {
-                            type: currentSelection,
-                            precision: precision
-                        };
-                        await saveToServer(weekKey, currentCell.member, i, currentSelection, precision);
-                    }
-                } else {
-                    data[weekKey][currentCell.member][currentCell.dayIndex] = {
+            if (applyToWeek) {
+                for (let i = 0; i < 5; i++) {
+                    data[weekKey][currentCell.member][i] = {
                         type: currentSelection,
                         precision: precision
                     };
-                    await saveToServer(weekKey, currentCell.member, currentCell.dayIndex, currentSelection, precision);
+                    await saveToServer(weekKey, currentCell.member, i, currentSelection, precision);
                 }
-                
-                setSyncStatus('success', '✅ Synchronisé');
-            } catch (error) {
-                setSyncStatus('error', '❌ Erreur de sauvegarde');
+            } else {
+                data[weekKey][currentCell.member][currentCell.dayIndex] = {
+                    type: currentSelection,
+                    precision: precision
+                };
+                await saveToServer(weekKey, currentCell.member, currentCell.dayIndex, currentSelection, precision);
             }
-            
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Enregistrer';
-            isSaving = false;
             
             closeModal();
             renderTable();
