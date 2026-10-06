@@ -1,4 +1,5 @@
-    <div class="header">
+<!DOCTYPE html>
+<div class="header">
         <div class="title-section">
             <h1 id="pageTitle">Où est la team CUT. ? 🚀</h1>
             <p class="subtitle">Indiquer votre présence site ou TT sur Teams/Outlook également</p>
@@ -15,7 +16,6 @@
     
     <div class="user-selector" id="userSelector">
         <span>Tu es :</span>
-        <!-- Les boutons seront générés dynamiquement -->
     </div>
     
     <div class="status-bar">
@@ -50,7 +50,6 @@
     </div>
 </div>
 
-<!-- Modal -->
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
         <h2 id="modalTitle">Marine</h2>
@@ -141,25 +140,19 @@
         currentTeam = team;
         const teamConfig = teams[team];
         
-        // Update body class
         document.body.className = teamConfig.bgClass;
         
-        // Update tabs
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('active');
         });
         document.querySelector(`.tab-btn.${team.toLowerCase()}`).classList.add('active');
         
-        // Update title
         document.getElementById('pageTitle').textContent = teamConfig.title;
         
-        // Update user selector
         renderUserSelector();
         
-        // Reset current user to first member
         currentUser = teamConfig.members[0];
         
-        // Load data for this team
         loadData();
     }
     
@@ -202,7 +195,6 @@
             
             const rows = await response.json();
             
-            // Clear and rebuild data for current team
             data = {};
             rows.forEach(row => {
                 if (!data[row.semaine]) data[row.semaine] = {};
@@ -383,7 +375,6 @@
             tbody.appendChild(row);
         });
         
-        // Total row
         const totalRow = document.createElement('tr');
         totalRow.className = 'total-row';
         totalRow.innerHTML = '<td>Total</td>';
@@ -484,3 +475,62 @@
         document.getElementById('modalOverlay').classList.remove('active');
         currentCell = null;
         currentSelection = null;
+    }
+    
+    function selectOption(value) {
+        currentSelection = value;
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.value === value);
+        });
+    }
+    
+    async function saveSelection() {
+        if (!currentSelection) {
+            alert('Veuillez sélectionner une option.');
+            return;
+        }
+        
+        const precision = document.getElementById('precisionInput').value.trim();
+        
+        if (currentSelection === 'autre' && !precision) {
+            alert('Veuillez préciser le lieu pour "Autre".');
+            return;
+        }
+        
+        const weekKey = getWeekKey(currentWeekOffset);
+        if (!data[weekKey]) data[weekKey] = {};
+        if (!data[weekKey][currentCell.member]) data[weekKey][currentCell.member] = {};
+        
+        const applyToWeek = document.getElementById('applyWeek').checked;
+        
+        if (applyToWeek) {
+            for (let i = 0; i < 5; i++) {
+                data[weekKey][currentCell.member][i] = {
+                    type: currentSelection,
+                    precision: precision
+                };
+                await saveToServer(weekKey, currentCell.member, i, currentSelection, precision);
+            }
+        } else {
+            data[weekKey][currentCell.member][currentCell.dayIndex] = {
+                type: currentSelection,
+                precision: precision
+            };
+            await saveToServer(weekKey, currentCell.member, currentCell.dayIndex, currentSelection, precision);
+        }
+        
+        closeModal();
+        renderTable();
+    }
+    
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+    
+    initWeekOffset();
+    renderUserSelector();
+    updateWeekDisplay();
+    loadData();
+</script>
