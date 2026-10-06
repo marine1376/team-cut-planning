@@ -22,7 +22,7 @@
             background: #FFE5D0;
         }
         
-        body.team-HERO {
+        body.team-hero {
             background: #FFF9E6;
         }
         
@@ -53,7 +53,7 @@
             color: #1a1a2e;
         }
         
-        .tab-btn.Hero {
+        .tab-btn.hero {
             background: #FFF9E6;
             color: #1a1a2e;
         }
@@ -527,7 +527,7 @@
     <div class="container">
         <div class="tabs">
             <button class="tab-btn cut active" onclick="switchTeam('CUT')">🚀 Team CUT</button>
-            <button class="tab-btn Hero" onclick="switchTeam('Hero')">🧨 Team HERO</button>
+            <button class="tab-btn hero" onclick="switchTeam('HERO')">🧨 Team HERO</button>
         </div>
         
         <div class="header">
@@ -641,12 +641,12 @@
                 members: ['Marine', 'Nicolas', 'Pauline', 'Martin', 'Emma', 'Aline'],
                 bgClass: 'team-cut'
             },
-            Hero: {
-                name: 'Hero',
-                title: 'Où est la Team HERO ? 🧨',
+            HERO: {
+                name: 'HERO',
+                title: 'Où est la team HERO ? 🧨',
                 emoji: '🧨',
                 members: ['Yaël', 'Juliette', 'Léonie', 'Chloé'],
-                bgClass: 'team-Hero'
+                bgClass: 'team-hero'
             }
         };
         
@@ -670,12 +670,21 @@
         function switchTeam(team) {
             currentTeam = team;
             const teamConfig = teams[team];
+            
             document.body.className = teamConfig.bgClass;
+            
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.tab-btn.' + team.toLowerCase()).classList.add('active');
+            if (team === 'CUT') {
+                document.querySelector('.tab-btn.cut').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn.hero').classList.add('active');
+            }
+            
             document.getElementById('pageTitle').textContent = teamConfig.title;
+            
             renderUserSelector();
             currentUser = teamConfig.members[0];
+            
             loadData();
         }
         
